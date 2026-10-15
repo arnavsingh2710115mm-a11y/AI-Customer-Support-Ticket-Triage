@@ -1,0 +1,16 @@
+.page { display: grid; gap: var(--space-6); max-width: 1000px; }
+.page header { padding: var(--space-5) 0 var(--space-4); max-width: 640px; }
+.page h1 { font-size: var(--text-2xl); margin-top: var(--space-5); line-height: 1.15; }
+.page p { color: var(--ink-3); margin-top: var(--space-3); }
+.page header > p { font-size: var(--text-md); margin-top: var(--space-5); line-height: 1.65; }
+.page h2 { font-size: var(--text-md); margin-top: var(--space-4); }
+.page > div:last-of-type > h2 { margin-top: 0; }
+.method { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr); gap: var(--space-3); align-items: center; }
+.method > div { height: 100%; }
+.method > svg { color: var(--ink-3); }
+.method > div > svg, .notes > div > svg { color: var(--accent); }
+.method p { font-size: var(--text-sm); }
+.notes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-6); }
+.source { font-size: var(--text-xs); }
+@media (max-width: 1023px) { .method { grid-template-columns: 1fr; } .method > svg { transform: rotate(90deg); justify-self: center; } }
+@media (max-width: 719px) { .page h1 { font-size: var(--text-xl); } .notes { grid-template-columns: 1fr; } }
