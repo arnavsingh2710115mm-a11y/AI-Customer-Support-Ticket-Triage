@@ -1,0 +1,138 @@
+{
+  "data_notice": "The bundled tickets.csv contains synthetic development and demonstration examples, not real historical customer tickets. Results on synthetic data do not establish real-world accuracy.",
+  "random_seed": 42,
+  "training_rows": 162,
+  "test_rows": 54,
+  "category": {
+    "accuracy": 0.7222222222222222,
+    "class_wise_and_averages": {
+      "Billing": {
+        "precision": 0.75,
+        "recall": 0.6428571428571429,
+        "f1-score": 0.6923076923076923,
+        "support": 14.0
+      },
+      "Technical": {
+        "precision": 0.5882352941176471,
+        "recall": 0.7692307692307693,
+        "f1-score": 0.6666666666666666,
+        "support": 13.0
+      },
+      "Account": {
+        "precision": 0.7692307692307693,
+        "recall": 0.7692307692307693,
+        "f1-score": 0.7692307692307693,
+        "support": 13.0
+      },
+      "Product": {
+        "precision": 0.8333333333333334,
+        "recall": 0.7142857142857143,
+        "f1-score": 0.7692307692307693,
+        "support": 14.0
+      },
+      "accuracy": 0.7222222222222222,
+      "macro avg": {
+        "precision": 0.7351998491704375,
+        "recall": 0.723901098901099,
+        "f1-score": 0.7243589743589743,
+        "support": 54.0
+      },
+      "weighted avg": {
+        "precision": 0.7372912127814089,
+        "recall": 0.7222222222222222,
+        "f1-score": 0.7245963912630579,
+        "support": 54.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        9,
+        4,
+        1,
+        0
+      ],
+      [
+        0,
+        10,
+        2,
+        1
+      ],
+      [
+        2,
+        0,
+        10,
+        1
+      ],
+      [
+        1,
+        3,
+        0,
+        10
+      ]
+    ],
+    "label_order": [
+      "Billing",
+      "Technical",
+      "Account",
+      "Product"
+    ]
+  },
+  "urgency": {
+    "accuracy": 0.8148148148148148,
+    "class_wise_and_averages": {
+      "Low": {
+        "precision": 0.8421052631578947,
+        "recall": 0.8421052631578947,
+        "f1-score": 0.8421052631578947,
+        "support": 19.0
+      },
+      "Medium": {
+        "precision": 0.8461538461538461,
+        "recall": 0.6470588235294118,
+        "f1-score": 0.7333333333333333,
+        "support": 17.0
+      },
+      "High": {
+        "precision": 0.7727272727272727,
+        "recall": 0.9444444444444444,
+        "f1-score": 0.85,
+        "support": 18.0
+      },
+      "accuracy": 0.8148148148148148,
+      "macro avg": {
+        "precision": 0.8203287940130046,
+        "recall": 0.8112028437105835,
+        "f1-score": 0.8084795321637427,
+        "support": 54.0
+      },
+      "weighted avg": {
+        "precision": 0.8202538202538202,
+        "recall": 0.8148148148148148,
+        "f1-score": 0.8104938271604938,
+        "support": 54.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        16,
+        2,
+        1
+      ],
+      [
+        2,
+        11,
+        4
+      ],
+      [
+        1,
+        0,
+        17
+      ]
+    ],
+    "label_order": [
+      "Low",
+      "Medium",
+      "High"
+    ]
+  }
+}

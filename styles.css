@@ -1,0 +1,43 @@
+.stApp {
+    background: #f5f8fd;
+    color: #172b4d;
+}
+.block-container {
+    max-width: 1180px;
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
+}
+h1, h2, h3 { letter-spacing: -0.025em; }
+.app-eyebrow {
+    color: #2563eb;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    margin-bottom: 0.5rem;
+}
+[data-testid="stVerticalBlockBorderWrapper"] > div {
+    border-radius: 16px;
+    background: #ffffff;
+}
+[data-testid="stMetricValue"] { color: #1d4ed8; }
+.stButton > button { border-radius: 10px; font-weight: 600; }
+.matrix-scroll { overflow-x: auto; margin: 0.6rem 0 1rem; }
+.confusion-matrix {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4px;
+    font-size: 0.9rem;
+}
+.confusion-matrix th { padding: 0.65rem; font-weight: 600; text-align: center; }
+.confusion-matrix tbody th { text-align: left; }
+.confusion-matrix td {
+    padding: 0.85rem;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    color: #172b4d;
+}
+@media (max-width: 640px) {
+    .block-container { padding-top: 1.5rem; }
+    .confusion-matrix th, .confusion-matrix td { padding: 0.4rem; }
+}
