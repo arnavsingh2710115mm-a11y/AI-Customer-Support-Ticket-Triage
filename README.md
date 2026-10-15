@@ -1,7 +1,7 @@
 # AI Customer Support Ticket Triage
 
-Beginner-friendly machine-learning backend and Streamlit dashboard for Python 3.12
-in the `ticket_ai` Conda environment. No paid AI API is used.
+Beginner-friendly machine-learning backend, FastAPI bridge, and Streamlit fallback
+for Python 3.12 in the `ticket_ai` Conda environment. No paid AI API is used.
 
 ## Dataset provenance
 
@@ -46,8 +46,8 @@ python -m streamlit run app.py
 ```
 
 `app.py` provides ticket input, category/urgency result cards, probability indicators,
-support queue routing, and manual review warnings. The sidebar controls the review
-threshold. Changing ticket text or the threshold clears the previous decision until
+support queue routing, and manual review warnings. The review threshold is controlled
+by the server configuration in `api/config.py`. Changing ticket text clears the previous decision until
 the ticket is classified again. The performance tab reads actual saved evaluation
 results, with macro and weighted metrics, class-wise scores, and annotated confusion
 matrices. `styles.css` and `.streamlit/config.toml` provide the light blue theme.
@@ -67,7 +67,109 @@ evaluation with `st.cache_data`; file modification timestamps and sizes invalida
 the caches when artifacts change. Missing artifacts produce setup guidance instead
 of automatic training. A missing evaluation file does not disable prediction.
 
-Packages were not installed and the dashboard was not launched during implementation.
+The Streamlit fallback runs independently of the FastAPI server.
+
+## FastAPI backend
+
+The API is a bridge to the existing prediction functions. It loads the trusted
+vectorizer and both classifiers once per server process at startup. It does not
+train models or modify data, evaluation results, or saved artifacts.
+
+From this project folder, use the existing Python 3.12 `ticket_ai` environment:
+
+```powershell
+conda activate ticket_ai
+python -m pip install -r requirements-dev.txt
+python -m uvicorn api.main:app --reload --port 8000
+```
+
+If Conda is not on PATH, the equivalent commands on this machine are:
+
+```powershell
+& "$env:USERPROFILE\anaconda3\envs\ticket_ai\python.exe" -m uvicorn api.main:app --reload --port 8000
+& "$env:USERPROFILE\anaconda3\envs\ticket_ai\python.exe" -B -m pytest tests/test_api_parity.py -q
+```
+
+API documentation is at `http://127.0.0.1:8000/api/docs`.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Model readiness and read-only review threshold; 503 if loading failed |
+| `POST /api/triage` | Classify and route through the original trained models |
+| `GET /api/evaluation` | Original saved evaluation values, without recomputation |
+| `GET /api/evaluation/download` | Download the original evaluation bytes |
+
+Example request using PowerShell:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/health
+$ticketBody = @{ text = 'My payment was deducted twice.' } | ConvertTo-Json
+Invoke-RestMethod http://127.0.0.1:8000/api/triage -Method Post -ContentType 'application/json' -Body $ticketBody
+```
+
+The triage response contains `category` and `urgency` objects with `label`, raw
+`confidence`, and full `probabilities`. The `decision` object contains `needs_review`,
+`reasons`, `assigned_queue`, and `suggested_queue`. When review is required,
+`assigned_queue` is null and the suggested category queue remains available. The
+API reports a routing decision; it does not send a ticket to an external service.
+The read-only `review_threshold` is also returned.
+
+Only the `text` field is accepted. Text is strictly a string, trimmed, and must
+contain 10–20,000 characters. The maximum preserves the existing Streamlit limit;
+10 is the API minimum because the fallback had no explicit minimum. Empty,
+formatting-only, invalid-type, and extra-field requests receive HTTP 422. Clients
+cannot override the threshold. Errors use `{"error": {"code": "...", "message": "..."}}`
+and do not echo ticket text, local paths, or internal exceptions.
+
+Server administrators may set configuration before starting either application:
+
+```powershell
+$env:REVIEW_THRESHOLD = '0.60'
+$env:EVALUATION_PATH = 'models/evaluation.json'
+```
+
+The threshold must be finite and between 0 and 1 inclusive; invalid configuration
+fails startup with a concise message. Relative evaluation paths resolve against the
+project folder; absolute paths are supported. Restart the processes after changes.
+The Streamlit threshold slider has been removed; its tabs and evaluation remain.
+The independent legacy prediction CLI retains its existing threshold argument.
+
+Missing/unreadable models produce 503 `MODELS_MISSING` on health and triage; provide
+all three trusted artifacts from the same run with compatible dependencies and
+restart. Evaluation remains accessible if models fail to load. A missing evaluation
+returns 404 `EVALUATION_MISSING`; unreadable or malformed JSON has a structured 503.
+Models do not automatically reload while the server runs.
+
+CORS permits only `http://localhost:5173` and `http://127.0.0.1:5173`. If a future
+`frontend/dist` folder exists when the API starts, static assets are served at `/`
+and frontend page routes fall back to `index.html`. Unknown `/api` routes and
+missing assets with file extensions return 404 instead of the frontend. The backend
+also starts without that folder. No React frontend or review logging is included.
+
+Run the meaningful automated checks with the environment's interpreter:
+
+```powershell
+python -B -m pytest tests/test_api_parity.py -q
+```
+
+Tests compare genuine direct/API predictions on the first three tickets per
+category, exercise threshold routing, strict validation, unchanged evaluation and
+downloads, missing artifacts, model caching, CORS, SPA routing, configuration, and
+the Streamlit fallback via AppTest. Temporary fixtures never alter real artifacts.
+The suite also verifies that protected ML sources, data, and model files retain
+their original SHA-256 hashes throughout testing.
+
+The added dependencies were validated in `ticket_ai` with FastAPI 0.143.1,
+Uvicorn 0.54.0, pytest 9.1.1, httpx 0.28.1, and Pydantic 2.14.1. The existing
+scikit-learn version is 1.9.1. The four newly declared API/test dependencies are
+pinned to their installed versions after validation. Starlette currently emits a
+non-failing deprecation warning about its httpx TestClient adapter; the requested
+httpx dependency remains in use without adding another HTTP client.
+
+This development API has no authentication, rate limiting, or persistent ticket
+storage. Before external deployment, add access controls, request limits, HTTPS,
+and an explicit policy for handling customer data. CORS alone is not authentication.
+No customer text is intentionally logged by the API's error handlers.
 
 ## Backend commands
 

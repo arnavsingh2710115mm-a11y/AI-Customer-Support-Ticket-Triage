@@ -7,8 +7,8 @@ import logging
 import pandas as pd
 import streamlit as st
 
+from api.config import REVIEW_THRESHOLD
 from predict_ticket import (
-    DEFAULT_CONFIDENCE_THRESHOLD,
     MODEL_FILENAMES,
     PROJECT_DIR,
     load_ticket_models,
@@ -96,13 +96,7 @@ def show_ticket_interface():
         placeholder="Describe what happened, who is affected, and any deadlines…",
         help="Enter the ticket itself. Avoid including passwords or payment card details.",
     )
-    threshold = st.sidebar.slider(
-        "Manual review threshold", min_value=0.0, max_value=1.0,
-        value=DEFAULT_CONFIDENCE_THRESHOLD, step=0.05, format="%.2f",
-        help="Review is required if either prediction score is below this value. "
-             "Text with no recognized vocabulary always requires review.",
-    )
-    st.sidebar.caption("Higher thresholds send more tickets for human review.")
+    threshold = REVIEW_THRESHOLD
     current_input = (ticket_text, threshold, signature)
     # Do not leave an old routing decision visible after input/settings change.
     if st.session_state.get("prediction_input") != current_input:
