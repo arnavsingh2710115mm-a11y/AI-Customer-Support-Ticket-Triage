@@ -1,5 +1,9 @@
 # AI Customer Support Ticket Triage
 
+**Live React + FastAPI website:** https://ai-customer-support-ticket-triage-8jbp.onrender.com
+
+**Deployment:** Render (Docker, Python 3.12 and Node 22 build stage). The live application serves the compiled React dashboard and FastAPI endpoints from one web service. Its ticket classification, confidence-based manual-review decision, and administrator-protected review log were manually verified on 15 October 2026. Use only fictional or non-sensitive demonstration tickets. The free instance may take time to wake after inactivity; review-log files are ephemeral and may be lost on restart or redeployment. Production use requires persistent storage, real authentication, and customer-data safeguards.
+
 AI-assisted support operations console with a React + TypeScript frontend,
 a FastAPI bridge, and an independent Streamlit fallback. The Python backend runs
 in the Python 3.12 `ticket_ai` Conda environment. No paid AI API is used.
@@ -379,7 +383,7 @@ No browser connection is available in this session, so automated component/serve
 checks do not establish the rendered layouts at 1440, 1024, 768, or 375px. At each
 width, check both themes, tooltip placement, navigation, ticket/prediction cards,
 table scrolling, token entry/lock, pagination, detail-panel focus, and readable text.
-The manual checklist above remains applicable. No deployment was performed.
+The manual checklist above remains applicable. These checks preceded deployment; the subsequent Render deployment was verified on 15 October 2026.
 
 Latest executed checks: **102 Python tests passed**, **18 live frontend/client and
 React-rendering checks passed**, and TypeScript, ESLint, and the production build
