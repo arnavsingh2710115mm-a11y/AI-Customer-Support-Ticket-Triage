@@ -1,0 +1,52 @@
+.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+.pageHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-5); padding: var(--space-3) 0 var(--space-2); }
+.pageHeader > div { min-width: 0; }
+.pageHeader p { margin-top: var(--space-3); color: var(--ink-3); }
+.pageHeader > button { flex-shrink: 0; }
+.authCard { max-width: 640px; }
+.authIcon { display: grid; place-items: center; width: 48px; height: 48px; color: var(--review); background: var(--review-soft); border-radius: var(--radius-card); margin-bottom: var(--space-5); }
+.authCard h2 { font-size: var(--text-lg); }
+.authCard p { color: var(--ink-3); margin-top: var(--space-3); }
+.authCard form { display: grid; gap: var(--space-3); margin-top: var(--space-6); }
+.authCard label { font-weight: 500; }
+.authCard input { width: 100%; min-width: 0; min-height: 46px; padding: var(--space-3); color: var(--ink); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-control); }
+.authCard .helper { margin: 0; font-size: var(--text-sm); }
+.authCard form > button { justify-self: start; margin-top: var(--space-2); }
+.authCard .setupNote { font-size: var(--text-sm); padding-top: var(--space-5); margin-top: var(--space-6); border-top: 1px solid var(--border); overflow-wrap: anywhere; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.accessNotice { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--accent); font-size: var(--text-sm); }
+.accessNotice > span { color: var(--ink-3); }
+.tableControls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); font-size: var(--text-sm); }
+.tableControls select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-control); min-height: 44px; padding: var(--space-2); }
+.recordsCard { padding: 0; }
+.tableScroll { max-width: 100%; min-width: 0; overflow-x: auto; border-radius: var(--radius-card) var(--radius-card) 0 0; }
+.table { width: 100%; min-width: 1000px; border-collapse: collapse; text-align: left; font-size: var(--text-sm); }
+.table th, .table td { padding: var(--space-4); border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table thead th { color: var(--ink-3); background: var(--surface-2); font-weight: 500; white-space: nowrap; }
+.table tbody th { font-weight: 400; width: 180px; }
+.table tbody tr:hover { background: var(--surface-2); }
+.table td > strong { font-weight: 500; }
+.ticketId { display: block; overflow-wrap: anywhere; max-width: 170px; font-size: var(--text-xs); line-height: 1.6; }
+.confidence { display: block; color: var(--ink-3); margin-top: var(--space-2); font-size: var(--text-xs); white-space: nowrap; }
+.pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4); padding: var(--space-4) var(--space-5); color: var(--ink-3); font-size: var(--text-sm); }
+.pagination > div { display: flex; gap: var(--space-2); }
+.detailHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+.detailHeader h2 { font-size: var(--text-lg); margin-top: var(--space-3); border-radius: var(--radius-control); }
+.detailGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); padding: var(--space-5) 0; margin: var(--space-5) 0 0; border-top: 1px solid var(--border); }
+.detailGrid dt { color: var(--ink-3); font-size: var(--text-sm); }
+.detailGrid dd { margin: var(--space-2) 0 0; overflow-wrap: anywhere; }
+.detailLabel { font-size: var(--text-md); margin: var(--space-5) 0 var(--space-3); }
+.complaint { padding: var(--space-4); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-control); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.reasons { margin: 0; padding-left: var(--space-5); color: var(--review); overflow-wrap: anywhere; }
+.reasons li + li { margin-top: var(--space-2); }
+.privacyNote { font-size: var(--text-sm); color: var(--ink-3); }
+@media (max-width: 719px) {
+  .pageHeader { flex-direction: column; }
+  .pageHeader > button, .authCard form > button { width: 100%; }
+  .tableControls { width: 100%; }
+  .tableControls > button { margin-left: auto; }
+  .pagination { padding: var(--space-4); }
+  .pagination > div { width: 100%; }
+  .pagination button { flex: 1; }
+  .detailGrid { grid-template-columns: minmax(0, 1fr); }
+}

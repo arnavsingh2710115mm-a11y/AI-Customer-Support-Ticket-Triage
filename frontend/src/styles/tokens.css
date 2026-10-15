@@ -10,8 +10,8 @@
   --rust: #8B431D; --rust-rgb: 180,88,29; --matrix-diagonal: var(--accent); --matrix-error: var(--rust);
   --white: #FFFFFF; --disabled: #5F6672;
   --font-ui: 'Geist Sans', sans-serif; --font-mono: 'Geist Mono', monospace;
-  --text-xs: 12px; --text-sm: 13px; --text-base: 14px; --text-md: 16px;
-  --text-lg: 20px; --text-xl: 28px; --text-2xl: 40px; --text-number: 32px;
+  --text-xs: 13px; --text-sm: 14px; --text-base: 16px; --text-md: 18px;
+  --text-lg: 22px; --text-xl: 30px; --text-2xl: 40px; --text-number: 34px;
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
   --space-5: 20px; --space-6: 24px; --space-7: 28px; --space-8: 32px;
   --space-10: 40px; --space-12: 48px; --space-16: 64px;

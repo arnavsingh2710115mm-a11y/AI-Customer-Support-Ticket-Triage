@@ -6,6 +6,7 @@ import { EXAMPLE_INPUTS } from '../lib/examples';
 import type { ApiError } from '../lib/api';
 import type { CompletedTriage, InputRules } from '../lib/types';
 import { count } from '../lib/format';
+import { ticketLength } from '../lib/ticketText';
 import styles from '../components/triage/Triage.module.css';
 
 interface Props {
@@ -18,7 +19,7 @@ export function TriagePage(props: Props) {
   const [attempted, setAttempted] = useState(false);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const resultHeading = useRef<HTMLHeadingElement>(null);
-  const length = Array.from(text.trim()).length;
+  const length = ticketLength(text);
   const validation = rules && (length < rules.minLength
     ? 'Enter at least ' + count(rules.minLength) + ' characters to describe the issue.'
     : length > rules.maxLength ? 'Keep the ticket within ' + count(rules.maxLength) + ' characters.' : '');
@@ -45,7 +46,7 @@ export function TriagePage(props: Props) {
             <label htmlFor="ticket-text" className={styles.label}>Customer support ticket</label>
             <textarea id="ticket-text" ref={textarea} rows={6} value={text}
               placeholder="Describe what happened, who is affected, and any deadlines..."
-              aria-invalid={Boolean(attempted && validation)} aria-describedby="ticket-help ticket-count ticket-validation"
+              aria-invalid={Boolean(attempted && validation)} aria-describedby="ticket-help ticket-count ticket-validation ticket-privacy"
               onChange={event => { onTextChange(event.target.value); }}
               onKeyDown={event => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); submit(); } }} />
             <div className={styles.inputMeta}><span id="ticket-help">Ctrl/Cmd + Enter to classify</span>
@@ -59,13 +60,14 @@ export function TriagePage(props: Props) {
               </Button>
               <Button variant="ghost" type="button" onClick={() => { onTextChange(''); setAttempted(false); textarea.current?.focus(); }}>Clear</Button>
             </div>
+            <p id="ticket-privacy" className={styles.privacyNotice}>Tickets flagged for manual review may be stored on this application's server. Use synthetic or non-sensitive example tickets for this demonstration.</p>
           </form>
           <div className={styles.examples}><strong>Example inputs</strong><p>Try an input. Results come from the trained models.</p>
             <div className={styles.chips}>{EXAMPLE_INPUTS.map(example => <button key={example.label} type="button"
               onClick={() => { onTextChange(example.text); setAttempted(false); textarea.current?.focus(); }}>
               {example.label}<ArrowUpRight size={13} aria-hidden="true" /></button>)}</div>
           </div>
-          <div className={styles.composerFoot}><InfoDot /><span>Ticket text is sent only to this application's API and kept in memory in this browser.</span></div>
+          <div className={styles.composerFoot}><InfoDot /><span>Predictions suggest a support team. Tickets are not automatically forwarded.</span></div>
         </Card>
         <p className={styles.demoNote}>A student demonstration using synthetic training data. Review uncertain decisions before forwarding a ticket.</p>
       </section>

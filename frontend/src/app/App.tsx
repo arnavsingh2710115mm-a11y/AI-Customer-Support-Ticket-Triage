@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { ArrowUpRight, BarChart3, Check, Circle, Info, Inbox, Moon, Sun } from 'lucide-react';
+import { ArrowUpRight, BarChart3, Check, Circle, ClipboardList, Info, Inbox, Moon, Sun } from 'lucide-react';
 import { Badge, Button, Popover, Tooltip } from '../components/ui';
 import { asApiError, getHealth, getInputRules, isAborted, triage } from '../lib/api';
 import type { ApiError } from '../lib/api';
@@ -8,12 +8,15 @@ import type { CompletedTriage, HealthResponse, InputRules } from '../lib/types';
 import { TriagePage } from '../pages/TriagePage';
 import { PerformancePage } from '../pages/PerformancePage';
 import { AboutPage } from '../pages/AboutPage';
+import { ReviewLogPage } from '../pages/ReviewLogPage';
+import { ticketLength, trimTicketText } from '../lib/ticketText';
 import styles from './App.module.css';
 
 const pages = [
-  { to: '/', label: 'Triage', icon: Inbox, description: 'Classify, prioritize, and find the right team.' },
-  { to: '/performance', label: 'Model performance', icon: BarChart3, description: 'Understand the models behind each decision.' },
-  { to: '/about', label: 'About & method', icon: Info, description: 'A transparent look at the approach and its limits.' },
+  { to: '/', label: 'Triage', mobileLabel: 'Triage', icon: Inbox, description: 'Classify, prioritize, and find the right team.' },
+  { to: '/performance', label: 'Model performance', mobileLabel: 'Performance', icon: BarChart3, description: 'Understand the models behind each decision.' },
+  { to: '/review-log', label: 'Manual Review Log', mobileLabel: 'Review log', icon: ClipboardList, description: 'Administrator access to tickets awaiting review.' },
+  { to: '/about', label: 'About & method', mobileLabel: 'About', icon: Info, description: 'A transparent look at the approach and its limits.' },
 ];
 function firstTheme() {
   try {
@@ -64,8 +67,8 @@ export function App() {
   }
   async function classify() {
     if (busy || !rules) return;
-    const trimmed = text.trim();
-    const length = Array.from(trimmed).length;
+    const trimmed = trimTicketText(text);
+    const length = ticketLength(text);
     if (length < rules.minLength || length > rules.maxLength) return;
     activeRequest.current?.abort();
     const controller = new AbortController();
@@ -73,7 +76,7 @@ export function App() {
     setBusy(true); setError(null); setCompleted(null);
     const started = performance.now();
     try {
-      const result = await triage(trimmed, controller.signal);
+      const result = await triage(text, controller.signal);
       const elapsedMs = Math.round(performance.now() - started);
       await new Promise(resolve => setTimeout(resolve, Math.max(0, 250 - elapsedMs)));
       if (!controller.signal.aborted) {
@@ -99,7 +102,7 @@ export function App() {
       </NavLink>
       <nav className={styles.navigation}>{pages.map(item => <NavLink key={item.to} to={item.to} end={item.to === '/'}
         className={({ isActive }) => isActive ? styles.navItem + ' ' + styles.active : styles.navItem}>
-        <item.icon size={18} aria-hidden="true" /><span>{item.label}</span>
+        <item.icon size={18} aria-hidden="true" /><span className={styles.fullLabel}>{item.label}</span><span className={styles.mobileLabel}>{item.mobileLabel}</span>
       </NavLink>)}</nav>
       <div className={styles.sidebarFooter}><span className={styles.footerMark}><Circle size={12} /> Local model inference</span>
         <p>Student demonstration<br />Synthetic data</p><ArrowUpRight size={16} aria-hidden="true" /></div>
@@ -129,6 +132,7 @@ export function App() {
             completed={completed} busy={busy} error={error} rules={rules} connecting={connecting}
             connectionError={connectionError} onReconnect={() => setConnectionAttempt(value => value + 1)} />} />
           <Route path="/performance" element={<PerformancePage />} />
+          <Route path="/review-log" element={<ReviewLogPage />} />
           <Route path="/about" element={<AboutPage health={health} />} />
           <Route path="*" element={<div className={styles.notFound}><h1>Page not found</h1><p>Return to the ticket workspace to continue.</p><NavLink to="/">Go to triage</NavLink></div>} />
         </Routes>

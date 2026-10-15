@@ -23,7 +23,7 @@ export function ConfusionMatrix({ evaluation }: { evaluation: ClassifierEvaluati
       <Tabs label="Confusion matrix display" value={mode} onChange={setMode}
         options={[{ value: 'counts', label: 'Counts' }, { value: 'rate', label: '% of actual class' }]} />
     </div>
-    <div className={styles.tableScroll}>
+    <div className={styles.tableScroll} role="region" aria-label="Confusion matrix; scroll horizontally for all columns" tabIndex={0}>
       <table className={styles.matrix} aria-label="Confusion matrix: actual rows and predicted columns">
         <caption>Predicted class →</caption>
         <thead><tr><th scope="col">Actual class ↓</th>{labels.map((label, column) =>

@@ -14,7 +14,7 @@ export function ClassTable({ evaluation }: { evaluation: ClassifierEvaluation })
   }
   return <section aria-labelledby="class-table-title">
     <div className={styles.sectionHeading}><div><h2 id="class-table-title">Class-wise performance</h2><p>See the balance between precision and coverage for each class.</p></div></div>
-    <div className={styles.tableScroll}><table className={styles.classTable}>
+    <div className={styles.tableScroll} role="region" aria-label="Class-wise performance table; scroll horizontally for all columns" tabIndex={0}><table className={styles.classTable}>
       <caption className="sr-only">Precision, recall, F1 score, and support for each class and aggregate averages</caption>
       <thead><tr><th scope="col">Class</th><th scope="col">Precision</th><th scope="col">Recall</th><th scope="col">F1-score</th><th scope="col">Support</th></tr></thead>
       <tbody>{classRows(evaluation).map(item => row(item.label, item.report))}</tbody>

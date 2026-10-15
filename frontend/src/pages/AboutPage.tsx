@@ -21,9 +21,10 @@ export function AboutPage({ health }: { health: HealthResponse | null }) {
       <Card><UserRound size={22} aria-hidden="true" /><h2>People stay in the loop</h2>
         <p>A ticket needs review when either prediction falls below the server's threshold or no vocabulary is recognized.</p>
         {health && <p>Current review threshold: <strong className="mono">{percent(health.review_threshold)}</strong>. Set by developers; read-only here.</p>}
-        <p>This application displays a routing recommendation. It does not send tickets to a queue, record a review log, or provide approval controls.</p></Card></div>
-    <Card><h2>Privacy and responsible use</h2><p>Ticket text goes only to this application's API. Input and results stay in React memory and disappear when the page is reloaded. Only your theme preference is stored in this browser.</p>
-      <p>This is a local development application without authentication or rate limiting. Avoid submitting sensitive credentials. Production use needs access controls, independent real-world validation, and a clear customer-data policy.</p></Card>
+        <p>This application displays a routing recommendation. Flagged tickets are logged as pending for an administrator to inspect. Forwarding and approval remain manual steps outside this application.</p></Card></div>
+    <Card><h2>Privacy and responsible use</h2><p>Ticket text goes to this application's API. Tickets flagged for manual review may be stored in a local server log. Submit synthetic or non-sensitive examples. Browser input and results disappear on reload; only your theme preference is stored in this browser.</p>
+      <p>The Manual Review Log requires an administrator token. The token stays temporarily in React memory and is cleared when the log is locked or you leave that page. Local server logs can be lost on cloud redeployment without persistent storage.</p>
+      <p>This demonstration access mechanism is not a complete production authentication system. Production use needs HTTPS, stronger authentication, rate limiting, a customer-data retention policy, and independent real-world validation.</p></Card>
     <p className={styles.source}>Method: TF-IDF + Logistic Regression · Source: models/evaluation.json · No paid AI API</p>
   </div>;
 }

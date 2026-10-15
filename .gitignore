@@ -1,4 +1,17 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+pytest-cache-files-*/
 .test_tmp*/
+frontend/node_modules/
+frontend/dist/
+frontend/.npm-cache/
+frontend/*.tsbuildinfo
+frontend/.validation/
+logs/
+*.jsonl
+*.jsonl.lock
+.manual_review-*.tmp
+.env
+.env.*
+!.env.example

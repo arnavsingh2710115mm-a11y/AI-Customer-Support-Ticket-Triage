@@ -27,3 +27,18 @@ if not EVALUATION_PATH.is_absolute():
 MIN_TEXT_LENGTH = 10
 MAX_TEXT_LENGTH = 20000
 CORS_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+# Administrator access is optional. Public classification never requires it.
+ADMIN_REVIEW_TOKEN = os.getenv("ADMIN_REVIEW_TOKEN", "")
+review_log_setting = os.getenv("REVIEW_LOG_PATH", "logs/manual_review.jsonl").strip()
+REVIEW_LOG_PATH = Path(review_log_setting).expanduser() if review_log_setting else None
+if REVIEW_LOG_PATH is not None and not REVIEW_LOG_PATH.is_absolute():
+    REVIEW_LOG_PATH = PROJECT_DIR / REVIEW_LOG_PATH
+
+REVIEW_LOG_MAX_PAGE_SIZE = 100
+try:
+    REVIEW_LOG_PAGE_SIZE = int(os.getenv("REVIEW_LOG_PAGE_SIZE", "20"))
+except ValueError:
+    raise ValueError("REVIEW_LOG_PAGE_SIZE must be an integer from 1 to 100.") from None
+if not 1 <= REVIEW_LOG_PAGE_SIZE <= REVIEW_LOG_MAX_PAGE_SIZE:
+    raise ValueError("REVIEW_LOG_PAGE_SIZE must be an integer from 1 to 100.")

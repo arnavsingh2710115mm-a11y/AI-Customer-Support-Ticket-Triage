@@ -1,4 +1,4 @@
-.page { display: grid; gap: var(--space-6); max-width: 1000px; }
+.page { display: grid; grid-template-columns: minmax(0,1fr); gap: var(--space-6); max-width: 1000px; }
 .page header { padding: var(--space-5) 0 var(--space-4); max-width: 640px; }
 .page h1 { font-size: var(--text-2xl); margin-top: var(--space-5); line-height: 1.15; }
 .page p { color: var(--ink-3); margin-top: var(--space-3); }

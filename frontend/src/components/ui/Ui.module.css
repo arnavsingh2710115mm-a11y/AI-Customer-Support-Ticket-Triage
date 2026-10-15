@@ -1,4 +1,4 @@
-.button { min-height: var(--space-10); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border: 1px solid var(--border-strong); border-radius: var(--radius-control); background: var(--surface); color: var(--ink-2); font-weight: 500; transition: background var(--transition), transform var(--transition), border-color var(--transition); text-decoration: none; }
+.button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border: 1px solid var(--border-strong); border-radius: var(--radius-control); background: var(--surface); color: var(--ink-2); font-size: 15px; font-weight: 500; transition: background var(--transition), transform var(--transition), border-color var(--transition); text-decoration: none; }
 .button:hover:not(:disabled) { background: var(--surface-2); border-color: var(--ink-3); }
 .button:active:not(:disabled) { transform: translateY(1px); }
 .button:disabled { color: var(--disabled); }
@@ -16,7 +16,10 @@
 .low { background: var(--low-soft); color: var(--low); }
 .tooltip { position: relative; display: inline-block; min-width: 0; }
 .tooltip:has(.meterFocus) { display: block; width: 100%; }
-.tooltipText { position: absolute; z-index: 30; pointer-events: none; bottom: calc(100% + var(--space-2)); left: 0; width: max-content; max-width: min(260px, 75vw); padding: var(--space-2) var(--space-3); background: var(--ink); color: var(--bg); border-radius: var(--radius-control); font-size: var(--text-xs); box-shadow: var(--shadow-popover); opacity: 0; visibility: hidden; }
+/* Left anchoring made the top-right theme tooltip extend beyond the viewport.
+   Hidden absolute elements can still enlarge scrollable overflow; anchor to the control's end. */
+.tooltipText { position: absolute; z-index: 30; pointer-events: none; bottom: calc(100% + var(--space-2)); right: 0; width: max-content; max-width: min(260px, 75vw); padding: var(--space-2) var(--space-3); background: var(--ink); color: var(--bg); border-radius: var(--radius-control); font-size: var(--text-xs); box-shadow: var(--shadow-popover); opacity: 0; visibility: hidden; }
+.tooltip:has(.meterFocus) > .tooltipText { max-width: max(140px, min(260px, 100%)); overflow-wrap: anywhere; }
 .tooltip:hover > .tooltipText, .tooltip:focus-within > .tooltipText { visibility: visible; opacity: 1; }
 .popover { position: relative; }
 .popover summary { display: flex; align-items: center; list-style: none; cursor: pointer; min-height: var(--space-10); border-radius: var(--radius-control); }
@@ -29,8 +32,8 @@
 .tick { position: absolute; height: var(--space-4); width: 2px; top: calc(-1 * var(--space-1)); background: var(--ink-2); transform: translateX(-1px); }
 .smallMeter { height: var(--space-1); }
 .smallMeter .tick { height: var(--space-3); }
-.tabs { display: inline-flex; max-width: 100%; padding: var(--space-1); gap: var(--space-1); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-control); }
-.tabs button { color: var(--ink-3); background: transparent; border: 0; border-radius: calc(var(--radius-control) - 2px); padding: var(--space-2) var(--space-4); font-size: var(--text-sm); min-height: var(--space-8); transition: background var(--transition), color var(--transition); }
+.tabs { display: flex; justify-self: start; min-width: 0; width: fit-content; max-width: 100%; flex-wrap: wrap; padding: var(--space-1); gap: var(--space-1); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-control); }
+.tabs button { flex: 1 1 auto; min-width: 0; color: var(--ink-3); background: transparent; border: 0; border-radius: calc(var(--radius-control) - 2px); padding: var(--space-2) var(--space-4); font-size: var(--text-sm); min-height: 44px; transition: background var(--transition), color var(--transition); }
 .tabs button[aria-selected='true'] { color: var(--ink); background: var(--surface); box-shadow: var(--shadow-card); }
 .tabs button:hover { color: var(--ink); background: var(--surface); }
 .skeletonGroup { display: grid; gap: var(--space-4); }
@@ -38,7 +41,7 @@
 .skeleton:first-child { width: 65%; height: var(--space-10); }
 .banner { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); border-radius: var(--radius-control); border: 1px solid var(--border); color: var(--ink-2); background: var(--surface-2); font-size: var(--text-sm); overflow-wrap: anywhere; }
 .banner > svg { margin-top: 1px; flex-shrink: 0; }
-.banner > div { flex: 1; }
+.banner > div { flex: 1; min-width: 0; }
 .banner.error { color: var(--error); background: var(--error-soft); border-color: var(--error); }
 .empty { display: grid; justify-items: center; text-align: center; gap: var(--space-4); padding: var(--space-12) var(--space-4); color: var(--ink-3); }
 .empty h2 { color: var(--ink); }

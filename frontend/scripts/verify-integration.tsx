@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
-  ApiError, getEvaluation, getHealth, getInputRules, isAborted, parseEvaluation, parseHealth, parseTriage, triage,
+  ApiError, getEvaluation, getHealth, getInputRules, getReviewLog, isAborted, parseEvaluation, parseHealth, parseReviewLog, parseTriage, triage,
 } from '../src/lib/api';
 import { confidence, count, metric } from '../src/lib/format';
 import { EXAMPLE_INPUTS } from '../src/lib/examples';
@@ -12,6 +12,9 @@ import { EvaluationMetrics } from '../src/components/performance/EvaluationMetri
 import { ClassTable } from '../src/components/performance/ClassTable';
 import { ConfusionMatrix } from '../src/components/performance/ConfusionMatrix';
 import { ResultPanel } from '../src/components/triage/ResultPanel';
+import { ReviewDetails, ReviewLogPage, ReviewRecords } from '../src/pages/ReviewLogPage';
+import { TriagePage } from '../src/pages/TriagePage';
+import { ticketLength } from '../src/lib/ticketText';
 import type { ClassReport } from '../src/lib/types';
 
 const base = process.env.VERIFY_API_URL ?? 'http://127.0.0.1:8000';
@@ -46,7 +49,7 @@ if (mode === 'unreachable') {
     assert.equal(rules.maxLength, schema.components.schemas.TriageRequest.properties.text.maxLength);
   });
   test('Unexpected response shapes fail clearly', () => {
-    for (const parse of [parseHealth, parseTriage, parseEvaluation]) {
+    for (const parse of [parseHealth, parseTriage, parseEvaluation, parseReviewLog]) {
       assert.throws(() => parse({}), error => error instanceof ApiError && error.code === 'INVALID_RESPONSE');
     }
   });
@@ -138,6 +141,79 @@ if (mode === 'unreachable') {
       assert.ok(html.includes(confidence(actual.category.confidence)));
       assert.ok(html.includes(confidence(actual.urgency.confidence)));
       assert.ok(html.includes(actual.decision.suggested_queue));
+    }
+  });
+  test('Composer counts Unicode code points and displays the actual API input limit', async () => {
+    const rules = await getInputRules(signal());
+    assert.equal(ticketLength('  😀 café\n'), 6);
+    assert.equal(ticketLength('😀'.repeat(rules.maxLength)), rules.maxLength);
+    assert.equal(ticketLength('😀'.repeat(rules.maxLength + 1)), rules.maxLength + 1);
+    const bomInput = '\uFEFF' + 'a'.repeat(rules.minLength - 1);
+    const controlInput = '\u0085\u001C' + 'a'.repeat(rules.minLength - 1);
+    assert.equal(ticketLength(bomInput), rules.minLength);
+    assert.equal(ticketLength(controlInput), rules.minLength - 1);
+    assert.equal((await originalFetch(base + '/api/triage', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: bomInput }),
+    })).status, 200);
+    assert.equal((await originalFetch(base + '/api/triage', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: controlInput }),
+    })).status, 422);
+    const html = renderToStaticMarkup(<TriagePage text={'😀'.repeat(rules.minLength)} onTextChange={() => {}}
+      onClassify={() => {}} completed={null} busy={false} error={null} rules={rules} connecting={false}
+      connectionError={null} onReconnect={() => {}} />);
+    assert.ok(html.includes(count(rules.minLength) + ' / ' + count(rules.maxLength)));
+    assert.ok(html.includes('Tickets flagged for manual review may be stored'));
+    assert.ok(html.includes('synthetic or non-sensitive'));
+  });
+  test('Review page starts locked without rendering customer records', () => {
+    const html = renderToStaticMarkup(<ReviewLogPage />);
+    assert.ok(html.includes('Administrator access'));
+    assert.ok(html.includes('type="password"'));
+    assert.ok(html.includes('Unlock review log'));
+    assert.ok(!html.includes('<table'));
+  });
+  test('Review client rejects unauthenticated access with the actual authorization error', async () => {
+    await assert.rejects(getReviewLog('', 1, 20, signal()), error => error instanceof ApiError
+      && error.status === 401 && error.code === 'UNAUTHORIZED');
+  });
+  test('Review client sends the ephemeral token only in a header, disables caching, and renders actual records', async () => {
+    const token = process.env.VERIFY_REVIEW_TOKEN;
+    assert.ok(token, 'Validation requires an ephemeral server token in VERIFY_REVIEW_TOKEN');
+    const previousFetch = globalThis.fetch;
+    let checkedHeader = false;
+    globalThis.fetch = (input, init) => {
+      const url = new URL(String(input), base);
+      assert.equal(url.pathname, '/api/review-log');
+      assert.equal(url.search, '?page=1&page_size=20');
+      assert.ok(!url.href.includes(token), 'Credential must never appear in a URL');
+      assert.ok(new Headers(init?.headers).get('Authorization') === 'Bearer ' + token, 'Authorization must use the Bearer header');
+      assert.equal(init?.cache, 'no-store');
+      checkedHeader = true;
+      return previousFetch(input, init);
+    };
+    let records;
+    try { records = await getReviewLog(token, 1, 20, signal()); }
+    finally { globalThis.fetch = previousFetch; }
+    assert.ok(checkedHeader);
+    const response = await originalFetch(base + '/api/review-log?page=1&page_size=20', {
+      headers: { Authorization: 'Bearer ' + token }, cache: 'no-store',
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(records, await response.json());
+    assert.ok(records.items.length > 0, 'Earlier genuine ML predictions should create review records');
+    const table = renderToStaticMarkup(<ReviewRecords records={records.items} onOpen={() => {}} />);
+    assert.equal([...table.matchAll(/<tr>/g)].length, records.items.length + 1);
+    for (const record of records.items) {
+      assert.ok(table.includes(record.ticket_id));
+      assert.ok(table.includes(record.category));
+      assert.ok(table.includes(confidence(record.category_confidence)));
+      assert.ok(table.includes(confidence(record.urgency_confidence)));
+      assert.ok(table.includes(record.suggested_queue));
+      assert.ok(table.includes('dateTime="' + record.timestamp + '"'));
+      const detail = renderToStaticMarkup(<ReviewDetails record={record} />);
+      assert.ok(detail.includes(record.ticket_id));
+      assert.ok(detail.includes('Original ticket'));
+      assert.ok(detail.includes('Pending'));
     }
   });
   test('Light and dark semantic text pairs meet WCAG AA, including matrix backgrounds', async () => {

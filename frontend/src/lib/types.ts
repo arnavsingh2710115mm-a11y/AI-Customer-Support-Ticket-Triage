@@ -52,3 +52,22 @@ export interface EvaluationResponse {
 }
 export interface InputRules { minLength: number; maxLength: number }
 export interface CompletedTriage { result: TriageResponse; elapsedMs: number; text: string }
+export interface ReviewRecord {
+  ticket_id: string;
+  timestamp: string;
+  ticket_text: string;
+  category: Category;
+  category_confidence: number;
+  urgency: Urgency;
+  urgency_confidence: number;
+  reasons: string[];
+  suggested_queue: SupportQueue;
+  status: 'pending';
+}
+export interface ReviewLogResponse {
+  items: ReviewRecord[];
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+}

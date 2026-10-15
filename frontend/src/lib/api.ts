@@ -1,5 +1,5 @@
 import type {
-  ClassifierEvaluation, ClassReport, EvaluationResponse, HealthResponse, InputRules, TriageResponse,
+  ClassifierEvaluation, ClassReport, EvaluationResponse, HealthResponse, InputRules, ReviewLogResponse, TriageResponse,
 } from './types';
 
 export class ApiError extends Error {
@@ -20,7 +20,9 @@ function unexpected(): never {
 async function request(path: string, signal: AbortSignal, init?: RequestInit): Promise<Response> {
   let response: Response;
   try {
-    response = await fetch(path, { ...init, signal, headers: { 'Content-Type': 'application/json' } });
+    const headers = new Headers(init?.headers);
+    if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    response = await fetch(path, { ...init, signal, headers });
   } catch (error) {
     if (isAborted(error)) throw error;
     throw new ApiError('API_UNREACHABLE', 'Cannot reach the local API. Start it from the project folder: python -m uvicorn api.main:app --port 8000');
@@ -92,6 +94,27 @@ export async function getHealth(signal: AbortSignal) { return parseHealth(await 
 export async function getEvaluation(signal: AbortSignal) { return parseEvaluation(await json('/api/evaluation', signal)); }
 export async function triage(text: string, signal: AbortSignal) {
   return parseTriage(await json('/api/triage', signal, { method: 'POST', body: JSON.stringify({ text }) }));
+}
+export function parseReviewLog(data: unknown): ReviewLogResponse {
+  if (!object(data) || !Array.isArray(data.items) || !integer(data.page) || data.page < 1
+    || !integer(data.page_size) || data.page_size < 1 || !integer(data.total) || !integer(data.total_pages)
+    || data.items.length > data.page_size) unexpected();
+  for (const item of data.items) {
+    if (!object(item) || typeof item.ticket_id !== 'string' || !item.ticket_id
+      || typeof item.timestamp !== 'string' || !Number.isFinite(Date.parse(item.timestamp))
+      || typeof item.ticket_text !== 'string' || !item.ticket_text
+      || !['Billing', 'Technical', 'Account', 'Product'].includes(String(item.category))
+      || !['Low', 'Medium', 'High'].includes(String(item.urgency))
+      || !probability(item.category_confidence) || !probability(item.urgency_confidence)
+      || !strings(item.reasons) || !['Billing Support', 'Technical Support', 'Account Support', 'Product Support'].includes(String(item.suggested_queue))
+      || item.status !== 'pending') unexpected();
+  }
+  return data as unknown as ReviewLogResponse;
+}
+export async function getReviewLog(token: string, page: number, pageSize: number, signal: AbortSignal) {
+  return parseReviewLog(await json('/api/review-log?page=' + page + '&page_size=' + pageSize, signal, {
+    headers: { Authorization: 'Bearer ' + token }, cache: 'no-store',
+  }));
 }
 export async function getInputRules(signal: AbortSignal): Promise<InputRules> {
   const data = await json('/api/openapi.json', signal);
